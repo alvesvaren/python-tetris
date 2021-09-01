@@ -69,15 +69,15 @@ class Block:
 blocks = [Block(*block) for block in zip(names, shapes, center_points, colors)]
 
 
-class Tetris:
-    def _generate_bag(self):
-        bag = blocks.copy()
-        shuffle(bag)
+def _generate_bag():
+    bag = blocks.copy()
+    shuffle(bag)
 
-        while bag:
-            yield bag[0]
-            bag.pop(0)
+    while bag:
+        yield bag[0]
+        bag.pop(0)
 
-    def generate_blocks(self):
-        while True:
-            yield from self._generate_bag()
+
+def generate_blocks():
+    while True:
+        yield from _generate_bag()
