@@ -4,6 +4,7 @@ from .tetris import blocks, Tetris
 
 window = pyglet.window.Window()
 
+print(blocks)
 
 @window.event
 def on_draw():

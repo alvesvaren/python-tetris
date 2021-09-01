@@ -1,6 +1,13 @@
 from random import shuffle
 
-
+names = (
+    "I",
+    "J",
+    "L",
+    "O",
+    "S",
+    "T",
+    "Z")
 shapes = ((
     "....",
     "XXXX",
@@ -42,7 +49,8 @@ colors = (
 
 
 class Block:
-    def __init__(self, shape: tuple[str, ...], center: tuple[float, float], color: tuple[int, int, int]):
+    def __init__(self, name: str, shape: tuple[str, ...], center: tuple[float, float], color: tuple[int, int, int]):
+        self.name = name
         self.shape = shape
         self.center = center
         self.rotation = 0
@@ -50,12 +58,15 @@ class Block:
     def rotate(self, offset: int):
         self.rotation += offset
 
+    def __repr__(self):
+        return f"Block(name='{self.name}', rotation={self.rotation})"
+
     @property
     def matrix(self):
         return
 
 
-blocks = [Block(*block) for block in zip(shapes, center_points, colors)]
+blocks = [Block(*block) for block in zip(names, shapes, center_points, colors)]
 
 
 class Tetris:
