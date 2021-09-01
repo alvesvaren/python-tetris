@@ -1,6 +1,6 @@
 import pyglet
 
-from .tetris import blocks, generate_blocks
+from . import blocks, generate_blocks
 
 window = pyglet.window.Window()
 blocks = generate_blocks()
