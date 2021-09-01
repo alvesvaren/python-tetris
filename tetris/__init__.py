@@ -1,7 +1,7 @@
 from random import shuffle
-from typing import Optional, Union
+from typing import Optional, Type, Union
 
-shape = tuple[str, ...]
+shape = list[tuple['BlockPart', ...]]
 
 names = (
     "I",
@@ -45,7 +45,7 @@ colors = (
 
 def rotate(shape: shape, offset: int = 1) -> shape:
     offset %= 4
-    new_shape = tuple("".join(row[::-1]) for row in zip(*shape))
+    new_shape = [row[::-1] for row in zip(*shape)]
     if offset == 1:
         return new_shape
     for _ in range(offset):
@@ -53,10 +53,20 @@ def rotate(shape: shape, offset: int = 1) -> shape:
     return shape
 
 
+class BlockPart:
+    def __init__(self, color: tuple[int, int, int], active: bool):
+        self.color = color
+        self.active = active
+
+    def __repr__(self):
+        return 'X' if self.active else "."
+
+
 class Block:
-    def __init__(self, name: str, shape: shape, color: tuple[int, int, int]):
+    def __init__(self, name: str, raw_shape: tuple[str, ...], color: tuple[int, int, int]):
         self.name = name
-        self.shape = shape
+        self.shape = [tuple(BlockPart(color, char == "X")
+                            for char in row) for row in raw_shape]
         self.rotation = 0
         self.color = color
 
@@ -72,7 +82,10 @@ class Block:
         return rotate(self.shape, self.rotation)
 
     def pprint_matrix(self):
-        print('\n'.join(self.matrix))
+        print(str(self))
+
+    def __str__(self):
+        return '\n'.join(map(lambda x: ''.join(map(repr, x)), self.matrix))
 
 
 blocks = [Block(*block) for block in zip(names, shapes, colors)]
@@ -97,7 +110,8 @@ class BaseBoard:
     empty_row = [None for _ in range(width)]
 
     def __init__(self):
-        self.board = [self.empty_row for y in range(self.height)]
+        self.board: list[Union[list[None], list[Block]]] = [
+            self.empty_row for y in range(self.height)]
 
     def __getitem__(self, *args, **kwargs):
         return self.board.__getitem__(*args, **kwargs)
@@ -132,19 +146,18 @@ class State:
         self.blocks = generate_blocks()
         self.board = GameBoard()
         # self.player_board = BaseBoard()
-        self.x, self.y = self.board.width//2 - 1, 0
+        self.default_x = self.board.width//2 - 1
+        self.x, self.y = self.default_x, 0
         self.current, self.next = next(self.blocks), next(self.blocks)
         self.hold = None
         self.score = 0
         self.level = 1
+        self.did_stash = False
 
     def tick(self):
         cleared_lines = self.board.clear_lines()
         assert cleared_lines <= 4
         self.score += scores_for_lines[cleared_lines] * (self.level + 1)
-
-        self.current = self.next
-        self.next = next(self.blocks)
 
     def move(self, dx: int, dy: int):
         self.x += dx
@@ -154,6 +167,8 @@ class State:
     def ghost_y(self):
         dy = 0
         while self.board.fits_block(self.current, self.x, self.y + dy):
+            if (dy < 0 or dy > self.board.height):
+                break
             dy += 1
         return self.y + dy
 
@@ -162,9 +177,21 @@ class State:
 
     def soft_drop(self):
         self.y += 1
-    
+
     def left(self):
         self.x -= 1
 
     def right(self):
         self.x += 1
+
+    def stash(self):
+        self.hold = self.current
+        self.current = self.next
+        self.x, self.y = self.default_x, 0
+        self.did_stash = True
+
+    def _finish_drop(self):
+        self.current = self.next
+        self.next = next(self.blocks)
+        self.x, self.y = self.default_x, 0
+        self.did_stash = False
