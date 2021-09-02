@@ -1,4 +1,4 @@
-from typing import Callable, Type
+from typing import Callable
 import pyglet
 import pyglet.window.key as key
 from . import BlockPart, State, div_vec
@@ -10,7 +10,7 @@ grid_color = 33, 33, 33
 width, height = state.board.width, state.board.height
 
 window = pyglet.window.Window(
-    width=width*block_size, height=height*block_size)
+    width=width*block_size + 400, height=height*block_size)
 
 
 def ltg(x: int, y: int):
@@ -21,7 +21,7 @@ def ltg(x: int, y: int):
 @window.event
 def on_draw():
     window.clear()
-    draw_playfield(0, 0)
+    draw_playfield(200, 0)
 
 
 def draw_playfield(offset_x, offset_y):
@@ -37,7 +37,7 @@ def draw_grid(ltg: Callable[[int, int], tuple[int, int]] = ltg):
     for y in range(height - 1):
         x1, y1, x2, y2 = ltg(0, y) + ltg(width, y)
         pyglet.shapes.Line(x1, y1, x2, y2, 1, grid_color).draw()
-    for x in range(width):
+    for x in range(width + 1):
         x1, y1, x2, y2 = ltg(x, -1) + ltg(x, height)
         pyglet.shapes.Line(x1, y1, x2, y2, 1, grid_color).draw()
 
@@ -88,7 +88,7 @@ def on_key_press(symbol, modifiers):
 
 
 def update(dt):
-    state.tick()
+    print(state.tick())
 
 
 pyglet.clock.schedule_interval(update, 1.5)

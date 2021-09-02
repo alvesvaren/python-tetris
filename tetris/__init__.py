@@ -65,9 +65,6 @@ class BlockPart:
     def __init__(self, color: tuple[int, int, int]):
         self.color = color
 
-    def __repr__(self):
-        return "X"
-
 
 class Block:
     def __init__(self, name: str, raw_shape: tuple[str, ...], color: tuple[int, int, int]):
@@ -177,14 +174,6 @@ class BaseBoard:
                 if part:
                     self.board[y + dy][x + dx] = part
 
-    def __str__(self):
-        val = ""
-        for row in self.board:
-            for block_part in row:
-                val += str(block_part) if block_part else "."
-            val += "\n"
-        return val
-
 
 class GameBoard(BaseBoard):
     def clear_lines(self):
@@ -197,29 +186,29 @@ class GameBoard(BaseBoard):
         return lines_cleared
 
 
-scores_for_lines = (0, 40, 100, 300, 1200)
-gravity_for_level = div_vec((48, 43, 38, 33, 28, 23, 18, 13, 8, 6,
-                             5, 5, 5, 4, 4, 4, 3, 3, 3) + ((2,) * 10), 24)
+scores_for_lines = (0, 100, 300, 500, 800)
+gravity_for_level = div_vec_f((48, 43, 38, 33, 28, 23, 18, 13, 8, 6,
+                               5, 5, 5, 4, 4, 4, 3, 3, 3) + ((2,) * 10), 30)
 
 
 class State:
     def __init__(self):
         self.blocks = generate_blocks()
         self.board = GameBoard()
-        # self.player_board = BaseBoard()
         self.default_x = self.board.width//2 - 1
         self.x, self.y = self.default_x, 0
         self.current, self.next = next(self.blocks), next(self.blocks)
         self.hold = None
+        self.cleared_lines = 0
         self.score = 0
-        self.level = 1
         self.did_stash = False
 
     def tick(self):
         self.soft_drop()
-        print(self.board)
         if self.y >= (self.bottom_fitting_y):
             self.finish_drop()
+
+        return self.gravity
 
     def move(self, dx: int, dy: int):
         self.x += dx
@@ -230,6 +219,10 @@ class State:
         if self.level < len(gravity_for_level):
             return gravity_for_level[self.level]
         return 1
+
+    @property
+    def level(self):
+        return self.cleared_lines//10
 
     @property
     def bottom_fitting_y(self):
@@ -259,13 +252,13 @@ class State:
 
     def rotate(self, offset: int = 1):
         self.current.rotate(offset)
+        self.constrain()
         if not self.fits:
             self.x += 1
             if not self.fits:
                 self.x -= 2
                 if not self.fits:
                     self.current.rotate(-offset)
-        self.constrain()
 
     def constrain(self):
         while self.x + self.current.max_x > self.board.width:
@@ -294,5 +287,4 @@ class State:
         self.did_stash = False
 
         cleared_lines = self.board.clear_lines()
-        assert cleared_lines <= 4
         self.score += scores_for_lines[cleared_lines] * (self.level + 1)
