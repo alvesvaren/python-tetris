@@ -1,5 +1,5 @@
 from random import shuffle
-from typing import Any, Optional, Type, Union, cast
+from typing import Optional
 
 Shape = list[tuple[Optional['BlockPart'], ...]]
 

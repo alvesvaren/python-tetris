@@ -1,8 +1,6 @@
-from typing import Type
 import pyglet
 import pyglet.window.key as key
 from . import BlockPart, State, div_vec
-
 
 state = State()
 
@@ -15,6 +13,7 @@ window = pyglet.window.Window(
 
 
 def ltg(x: int, y: int):
+    """Convert local coordinate to global coordinate (where on screen to render)"""
     return x * block_size, (height - y) * block_size
 
 
