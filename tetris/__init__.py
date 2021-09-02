@@ -87,13 +87,40 @@ class Block:
     @property
     def matrix(self):
         return rotate(self.shape, self.rotation)
-    
+
     @property
     def height(self):
-        return len(self.matrix) - 1
+        height = len(self.matrix) - 1
+        for row in self.matrix[::-1]:
+            if any(row):
+                break
+            else:
+                height -= 1
+        return height
 
     def pprint_matrix(self):
         print(str(self))
+
+    @property
+    def max_x(self):
+        cols = tuple(zip(*self.matrix))[::-1]
+        min_x = len(cols)
+        for col in cols:
+            if any(col):
+                break
+            else:
+                min_x -= 1
+        return min_x
+
+    @property
+    def min_x(self):
+        min_x = 0
+        for col in tuple(zip(*self.matrix)):
+            if any(col):
+                break
+            else:
+                min_x += 1
+        return min_x
 
     def __str__(self):
         return '\n'.join(map(lambda x: ''.join(map(lambda x: "X" if x else ".", x)), self.matrix))
@@ -122,7 +149,7 @@ class BaseBoard:
 
     def __init__(self):
         self.board = [
-            self.empty_row for _ in range(self.height)]
+            self.empty_row.copy() for _ in range(self.height)]
 
     def __getitem__(self, *args, **kwargs):
         return self.board.__getitem__(*args, **kwargs)
@@ -133,19 +160,20 @@ class BaseBoard:
     def fits_block(self, block: Block, dx: int, dy: int):
         for y, row in enumerate(block.matrix):
             for x, part in enumerate(row):
+                if not part:
+                    continue
                 try:
-                    if part and self[y + dy][x + dx]:
+                    if self[y + dy][x + dx]:
                         return False
                 except IndexError:
-                    print(x,y, "for part", part, "out of range")
                     return False
         return True
 
     def place_block(self, block: Block, dx: int, dy: int):
-        print(block.matrix)
         if not self.fits_block(block, dx, dy):
             raise ValueError("Block does not fit there")
         for y, row in enumerate(block.matrix):
+            # [[. . .], [X X X ]]
             for x, part in enumerate(row):
                 if part:
                     self.board[y + dy][x + dx] = part
@@ -166,7 +194,7 @@ class GameBoard(BaseBoard):
             if all(row):
                 lines_cleared += 1
                 self.board.pop(y)
-                self.board.insert(0, self.empty_row)
+                self.board.insert(0, self.empty_row.copy())
         return lines_cleared
 
 
@@ -193,9 +221,8 @@ class State:
         assert cleared_lines <= 4
         self.score += scores_for_lines[cleared_lines] * (self.level + 1)
         self.soft_drop()
-        if self.y >= (self.bottom_fitting_y + self.current.height):
+        if self.y >= (self.bottom_fitting_y):
             self.finish_drop()
-
 
     def move(self, dx: int, dy: int):
         self.x += dx
@@ -214,12 +241,7 @@ class State:
             if not self.board.fits_block(self.current, self.x, dy):
                 break
             dy += 1
-        return dy - len(self.current.matrix) + 1
-        # while self.board.fits_block(self.current, self.x, dy):
-        #     if dy >= self.board.height:
-        #         break
-        #     dy += 1
-        # return dy
+        return dy - self.current.height
 
     def hard_drop(self):
         print(self.bottom_fitting_y)
@@ -230,13 +252,32 @@ class State:
 
     def left(self):
         self.x -= 1
+        self.constrain()
 
     def right(self):
         self.x += 1
+        self.constrain()
+
+    def rotate(self, offset: int = 1):
+        self.current.rotate(offset)
+        self.constrain()
+    
+    def constrain(self):
+        while self.x + self.current.max_x > self.board.width:
+            self.x -= 1
+        
+        while self.x + self.current.min_x < 0:
+            self.x += 1
 
     def stash(self):
+        had_stashed = self.hold
         self.hold = self.current
-        self.current = self.next
+        if had_stashed:
+            self.current = had_stashed
+        else:
+            self.current = self.next
+            self.next = next(self.blocks)
+
         self.x, self.y = self.default_x, 0
         self.did_stash = True
 

@@ -69,7 +69,7 @@ def draw_ghost_block():
     for y, row in enumerate(state.current.matrix):
         for x, block_part in enumerate(row):
             if block_part:
-                block_parts.append((x + state.x, y + state.bottom_fitting_y + state.current.height, block_part))
+                block_parts.append((x + state.x, y + state.bottom_fitting_y, block_part))
     for x, y, block_part in block_parts:
         args = *ltg(x, y), block_size, block_size
         # print(args)
@@ -85,7 +85,7 @@ def on_key_press(symbol, modifiers):
     elif symbol in [key.S, key.DOWN]:
         state.soft_drop()
     elif symbol in [key.W, key.UP]:
-        state.current.rotate().pprint_matrix()
+        state.rotate()
     elif symbol == key.SPACE:
         state.hard_drop()
     elif symbol == key.C:
