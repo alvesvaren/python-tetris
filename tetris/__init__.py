@@ -245,10 +245,14 @@ class State:
 
     def left(self):
         self.x -= 1
+        if not self.board.fits_block(self.current, self.x, self.y):
+            self.x += 1
         self.constrain()
 
     def right(self):
         self.x += 1
+        if not self.board.fits_block(self.current, self.x, self.y):
+            self.x -= 1
         self.constrain()
 
     def rotate(self, offset: int = 1):
