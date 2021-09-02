@@ -1,7 +1,8 @@
-from typing import Callable, Union
+from typing import Any, Callable, Generator, Iterable, TypeVar, Union
 import pyglet
 import pyglet.window.key as key
 from . import BlockPart, State, div_vec
+from itertools import chain
 
 state = State()
 
@@ -13,6 +14,8 @@ playfield_offset_x, playfield_offset_y = 200, 0
 
 window = pyglet.window.Window(
     width=width*block_size + 400, height=height*block_size)
+
+T = TypeVar("T")
 
 
 def ltg(x: int, y: int):
@@ -38,6 +41,12 @@ def draw_block(x: int, y: int, color: Union[tuple[int, int, int], tuple[int, ...
         *args, 4, color, border_color).draw()
 
 
+def generate_matrix(matrix: Iterable[Iterable[T]]) -> Generator[tuple[int, int, T], None, None]:
+    for y, row in enumerate(matrix):
+        for x, val in enumerate(row):
+            yield x, y, val
+
+
 def draw_grid():
     for y in range(height - 1):
         x1, y1, x2, y2 = ltg(0, y) + ltg(width, y)
@@ -48,28 +57,22 @@ def draw_grid():
 
 
 def draw_blocks():
-    block_parts: list[tuple[int, int, BlockPart]] = []
-    for y, row in enumerate(state.board.board):
-        for x, block_part in enumerate(row):
-            if block_part:
-                block_parts.append((x, y, block_part))
-    for y, row in enumerate(state.current.matrix):
-        for x, block_part in enumerate(row):
-            if block_part:
-                block_parts.append((x + state.x, y + state.y, block_part))
-    for x, y, block_part in block_parts:
-        draw_block(x, y, block_part.color, div_vec(block_part.color, 2))
+    def draw(x: int, y: int, part: BlockPart):
+        draw_block(x, y, part.color, div_vec(part.color, 2))
+
+    for x, y, block_part in generate_matrix(state.board.board):
+        if block_part:
+            draw(x, y, block_part)
+    for x, y, block_part in generate_matrix(state.current.matrix):
+        if block_part:
+            draw(x + state.x, y + state.y, block_part)
 
 
 def draw_ghost_block():
-    block_parts: list[tuple[int, int, BlockPart]] = []
-    for y, row in enumerate(state.current.matrix):
-        for x, block_part in enumerate(row):
-            if block_part:
-                block_parts.append(
-                    (x + state.x, y + state.bottom_fitting_y, block_part))
-    for x, y, block_part in block_parts:
-        draw_block(x, y, div_vec(block_part.color, 8), div_vec(block_part.color, 3))
+    for x, y, block_part in generate_matrix(state.current.matrix):
+        if block_part:
+            draw_block(
+                x + state.x, y + state.bottom_fitting_y, div_vec(block_part.color, 8), div_vec(block_part.color, 3))
 
 
 @window.event
