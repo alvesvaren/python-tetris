@@ -6,6 +6,7 @@ from . import BlockPart, State, div_vec
 state = State()
 
 block_size = 33
+small_block_size = block_size // 2
 grid_color = 33, 33, 33
 width, height = state.board.width, state.board.height
 playfield_offset_x, playfield_offset_y = 200, 0
@@ -31,6 +32,7 @@ def draw_playfield():
     draw_grid()
     draw_ghost_blocks()
     draw_blocks()
+    draw_ui()
 
 
 def generate_matrix(matrix: Iterable[Iterable[T]]) -> Generator[tuple[int, int, T], None, None]:
@@ -40,9 +42,8 @@ def generate_matrix(matrix: Iterable[Iterable[T]]) -> Generator[tuple[int, int, 
 
 
 def draw_block(x: int, y: int, color: Union[tuple[int, int, int], tuple[int, ...]], border_color: Union[tuple[int, int, int], tuple[int, ...]]):
-    args = *ltg(x, y), block_size, block_size
     pyglet.shapes.BorderedRectangle(
-        *args, 4, color, border_color).draw()
+        *ltg(x, y), block_size, block_size, 4, color, border_color).draw()
 
 
 def draw_grid():
@@ -71,6 +72,26 @@ def draw_blocks():
     for x, y, block_part in generate_matrix(state.current.matrix):
         if block_part:
             draw(x + state.x, y + state.y, block_part)
+
+
+def draw_ui():
+    pyglet.text.Label("HOLD", "Open Sans", 24, True, color=(
+        255, 255, 255, 255), x=block_size + (small_block_size * 8) // 2, y=block_size * (height - 1.2), anchor_x='center').draw()
+    pyglet.shapes.BorderedRectangle(
+        block_size, block_size * (height - 4),
+        small_block_size * 8, small_block_size * 5, 16, (50, 50, 50), (33, 33, 33)).draw()
+    draw_hold_block()
+
+
+def draw_hold_block():
+    if state.hold:
+        for x, y, block_part in generate_matrix(state.hold.matrix):
+            if block_part:
+                local_x, local_y = x * small_block_size + block_size + \
+                    small_block_size * 2, y * small_block_size + \
+                    block_size * (height - 4)
+                pyglet.shapes.BorderedRectangle(
+                    local_x, local_y, small_block_size, small_block_size, 2, block_part.color, div_vec(block_part.color, 2)).draw()
 
 
 @window.event
