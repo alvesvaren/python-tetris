@@ -237,6 +237,10 @@ class State:
             dy += 1
         return dy - 1
 
+    @property
+    def fits(self):
+        return self.board.fits_block(self.current, self.x, self.y)
+
     def hard_drop(self):
         self.finish_drop()
 
@@ -245,13 +249,13 @@ class State:
 
     def left(self):
         self.x -= 1
-        if not self.board.fits_block(self.current, self.x, self.y):
+        if not self.fits:
             self.x += 1
         self.constrain()
 
     def right(self):
         self.x += 1
-        if not self.board.fits_block(self.current, self.x, self.y):
+        if not self.fits:
             self.x -= 1
         self.constrain()
 
