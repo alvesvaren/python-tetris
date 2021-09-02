@@ -217,6 +217,7 @@ class State:
 
     def tick(self):
         self.soft_drop()
+        print(self.board)
         if self.y >= (self.bottom_fitting_y):
             self.finish_drop()
 

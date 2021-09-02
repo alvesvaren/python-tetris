@@ -10,12 +10,12 @@ grid_color = 33, 33, 33
 width, height = state.board.width, state.board.height
 
 window = pyglet.window.Window(
-    width=(width)*block_size, height=(height)*block_size)
+    width=width*block_size, height=height*block_size)
 
 
 def ltg(x: int, y: int):
     """Convert local coordinate to global coordinate (where on screen to render)"""
-    return x * block_size, (height - y) * block_size
+    return x * block_size, (height - (y + 1)) * block_size
 
 
 @window.event
@@ -34,11 +34,11 @@ def draw_playfield(offset_x, offset_y):
 
 
 def draw_grid(ltg: Callable[[int, int], tuple[int, int]] = ltg):
-    for y in range(height):
-        x1, y1, x2, y2 = ltg(0, y + 1) + ltg(width + 1, y + 1)
+    for y in range(height - 1):
+        x1, y1, x2, y2 = ltg(0, y) + ltg(width, y)
         pyglet.shapes.Line(x1, y1, x2, y2, 1, grid_color).draw()
     for x in range(width):
-        x1, y1, x2, y2 = ltg(x + 1, 0) + ltg(x + 1, height)
+        x1, y1, x2, y2 = ltg(x, -1) + ltg(x, height)
         pyglet.shapes.Line(x1, y1, x2, y2, 1, grid_color).draw()
 
 
