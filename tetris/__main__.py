@@ -82,7 +82,7 @@ def on_key_press(symbol, modifiers):
     elif symbol in [key.W, key.UP]:
         state.rotate()
     elif symbol == key.SPACE:
-        state.hard_drop()
+        state.finish_drop()
     elif symbol == key.C:
         state.stash()
 

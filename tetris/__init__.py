@@ -241,9 +241,6 @@ class State:
     def fits(self):
         return self.board.fits_block(self.current, self.x, self.y)
 
-    def hard_drop(self):
-        self.finish_drop()
-
     def soft_drop(self):
         self.y += 1
 
