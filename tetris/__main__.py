@@ -1,3 +1,4 @@
+from typing import Callable, Type
 import pyglet
 import pyglet.window.key as key
 from . import BlockPart, State, div_vec
@@ -20,12 +21,19 @@ def ltg(x: int, y: int):
 @window.event
 def on_draw():
     window.clear()
-    draw_grid()
-    draw_ghost_block()
-    draw_blocks()
+    draw_playfield(0, 0)
 
 
-def draw_grid():
+def draw_playfield(offset_x, offset_y):
+    def new_ltg(x: int, y: int):
+        nx, ny = ltg(x, y)
+        return nx + offset_x, ny - offset_y
+    draw_grid(new_ltg)
+    draw_ghost_block(new_ltg)
+    draw_blocks(new_ltg)
+
+
+def draw_grid(ltg: Callable[[int, int], tuple[int, int]] = ltg):
     for y in range(height):
         x1, y1, x2, y2 = ltg(0, y + 1) + ltg(width + 1, y + 1)
         pyglet.shapes.Line(x1, y1, x2, y2, 1, grid_color).draw()
@@ -34,7 +42,7 @@ def draw_grid():
         pyglet.shapes.Line(x1, y1, x2, y2, 1, grid_color).draw()
 
 
-def draw_blocks():
+def draw_blocks(ltg: Callable[[int, int], tuple[int, int]] = ltg):
     block_parts: list[tuple[int, int, BlockPart]] = []
     for y, row in enumerate(state.board.board):
         for x, block_part in enumerate(row):
@@ -50,7 +58,7 @@ def draw_blocks():
             *args, 4, block_part.color, div_vec(block_part.color, 2)).draw()
 
 
-def draw_ghost_block():
+def draw_ghost_block(ltg: Callable[[int, int], tuple[int, int]] = ltg):
     block_parts: list[tuple[int, int, BlockPart]] = []
     for y, row in enumerate(state.current.matrix):
         for x, block_part in enumerate(row):
