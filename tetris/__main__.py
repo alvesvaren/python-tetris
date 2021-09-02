@@ -29,20 +29,20 @@ def on_draw():
 
 def draw_playfield():
     draw_grid()
-    draw_ghost_block()
+    draw_ghost_blocks()
     draw_blocks()
-
-
-def draw_block(x: int, y: int, color: Union[tuple[int, int, int], tuple[int, ...]], border_color: Union[tuple[int, int, int], tuple[int, ...]]):
-    args = *ltg(x, y), block_size, block_size
-    pyglet.shapes.BorderedRectangle(
-        *args, 4, color, border_color).draw()
 
 
 def generate_matrix(matrix: Iterable[Iterable[T]]) -> Generator[tuple[int, int, T], None, None]:
     for y, row in enumerate(matrix):
         for x, val in enumerate(row):
             yield x, y, val
+
+
+def draw_block(x: int, y: int, color: Union[tuple[int, int, int], tuple[int, ...]], border_color: Union[tuple[int, int, int], tuple[int, ...]]):
+    args = *ltg(x, y), block_size, block_size
+    pyglet.shapes.BorderedRectangle(
+        *args, 4, color, border_color).draw()
 
 
 def draw_grid():
@@ -52,6 +52,13 @@ def draw_grid():
     for x in range(width + 1):
         x1, y1, x2, y2 = ltg(x, -1) + ltg(x, height)
         pyglet.shapes.Line(x1, y1, x2, y2, 1, grid_color).draw()
+
+
+def draw_ghost_blocks():
+    for x, y, block_part in generate_matrix(state.current.matrix):
+        if block_part:
+            draw_block(
+                x + state.x, y + state.bottom_fitting_y, div_vec(block_part.color, 8), div_vec(block_part.color, 3))
 
 
 def draw_blocks():
@@ -64,13 +71,6 @@ def draw_blocks():
     for x, y, block_part in generate_matrix(state.current.matrix):
         if block_part:
             draw(x + state.x, y + state.y, block_part)
-
-
-def draw_ghost_block():
-    for x, y, block_part in generate_matrix(state.current.matrix):
-        if block_part:
-            draw_block(
-                x + state.x, y + state.bottom_fitting_y, div_vec(block_part.color, 8), div_vec(block_part.color, 3))
 
 
 @window.event
