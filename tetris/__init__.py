@@ -171,9 +171,8 @@ class BaseBoard:
 
     def place_block(self, block: Block, dx: int, dy: int):
         if not self.fits_block(block, dx, dy):
-            raise ValueError("Block does not fit there")
+            raise ValueError(f"Block does not fit at: x={dx} y={dy}")
         for y, row in enumerate(block.matrix):
-            # [[. . .], [X X X ]]
             for x, part in enumerate(row):
                 if part:
                     self.board[y + dy][x + dx] = part
@@ -217,9 +216,6 @@ class State:
         self.did_stash = False
 
     def tick(self):
-        cleared_lines = self.board.clear_lines()
-        assert cleared_lines <= 4
-        self.score += scores_for_lines[cleared_lines] * (self.level + 1)
         self.soft_drop()
         if self.y >= (self.bottom_fitting_y):
             self.finish_drop()
@@ -237,11 +233,9 @@ class State:
     @property
     def bottom_fitting_y(self):
         dy = self.y
-        while True:
-            if not self.board.fits_block(self.current, self.x, dy):
-                break
+        while self.board.fits_block(self.current, self.x, dy):
             dy += 1
-        return dy - self.current.height
+        return dy - 1
 
     def hard_drop(self):
         self.finish_drop()
@@ -286,3 +280,7 @@ class State:
         self.next = next(self.blocks)
         self.x, self.y = self.default_x, 0
         self.did_stash = False
+
+        cleared_lines = self.board.clear_lines()
+        assert cleared_lines <= 4
+        self.score += scores_for_lines[cleared_lines] * (self.level + 1)
