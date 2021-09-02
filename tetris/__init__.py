@@ -259,6 +259,12 @@ class State:
 
     def rotate(self, offset: int = 1):
         self.current.rotate(offset)
+        if not self.fits:
+            self.x += 1
+            if not self.fits:
+                self.x -= 2
+                if not self.fits:
+                    self.current.rotate(-offset)
         self.constrain()
 
     def constrain(self):
