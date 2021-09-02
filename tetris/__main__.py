@@ -44,8 +44,6 @@ def draw_static_blocks():
                 blocks.append((x, y, block))
     for x, y, block in blocks:
         args = *ltg(x, y), block_size, block_size
-        pyglet.shapes.Rectangle(
-            *args, block.color).draw()
         pyglet.shapes.BorderedRectangle(
             *args, 3, block.color, div_vec(block.color, 2)).draw()
 
@@ -58,8 +56,6 @@ def draw_current_block():
                 block_parts.append((x + state.x, y + state.y, block_part))
     for x, y, block_part in block_parts:
         args = *ltg(x, y), block_size, block_size
-        pyglet.shapes.Rectangle(
-            *args, block_part.color).draw()
         pyglet.shapes.BorderedRectangle(
             *args, 3, block_part.color, div_vec(block_part.color, 2)).draw()
 
