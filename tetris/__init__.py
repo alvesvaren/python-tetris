@@ -1,5 +1,5 @@
 from random import shuffle
-from typing import Optional
+from typing import Optional, TypeVar
 
 Shape = list[tuple[Optional['BlockPart'], ...]]
 
