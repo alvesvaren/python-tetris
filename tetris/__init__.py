@@ -244,7 +244,6 @@ class State:
         return dy - self.current.height
 
     def hard_drop(self):
-        print(self.bottom_fitting_y)
         self.finish_drop()
 
     def soft_drop(self):
@@ -261,11 +260,11 @@ class State:
     def rotate(self, offset: int = 1):
         self.current.rotate(offset)
         self.constrain()
-    
+
     def constrain(self):
         while self.x + self.current.max_x > self.board.width:
             self.x -= 1
-        
+
         while self.x + self.current.min_x < 0:
             self.x += 1
 

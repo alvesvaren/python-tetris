@@ -72,7 +72,6 @@ def draw_ghost_block():
                 block_parts.append((x + state.x, y + state.bottom_fitting_y, block_part))
     for x, y, block_part in block_parts:
         args = *ltg(x, y), block_size, block_size
-        # print(args)
         pyglet.shapes.BorderedRectangle(
             *args, 3, (5, 5, 5), div_vec(block_part.color, 3)).draw()
 
