@@ -4,7 +4,7 @@ from . import BlockPart, State, div_vec
 
 state = State()
 
-block_size = 25
+block_size = 33
 grid_color = 33, 33, 33
 width, height = state.board.width, state.board.height
 
@@ -21,9 +21,8 @@ def ltg(x: int, y: int):
 def on_draw():
     window.clear()
     draw_grid()
-    draw_static_blocks()
     draw_ghost_block()
-    draw_current_block()
+    draw_blocks()
 
 
 def draw_grid():
@@ -35,20 +34,12 @@ def draw_grid():
         pyglet.shapes.Line(x1, y1, x2, y2, 1, grid_color).draw()
 
 
-def draw_static_blocks():
-    blocks: list[tuple[int, int, BlockPart]] = []
-    for y, row in enumerate(state.board.board):
-        for x, block in enumerate(row):
-            if block:
-                blocks.append((x, y, block))
-    for x, y, block in blocks:
-        args = *ltg(x, y), block_size, block_size
-        pyglet.shapes.BorderedRectangle(
-            *args, 3, block.color, div_vec(block.color, 2)).draw()
-
-
-def draw_current_block():
+def draw_blocks():
     block_parts: list[tuple[int, int, BlockPart]] = []
+    for y, row in enumerate(state.board.board):
+        for x, block_part in enumerate(row):
+            if block_part:
+                block_parts.append((x, y, block_part))
     for y, row in enumerate(state.current.matrix):
         for x, block_part in enumerate(row):
             if block_part:
@@ -56,8 +47,7 @@ def draw_current_block():
     for x, y, block_part in block_parts:
         args = *ltg(x, y), block_size, block_size
         pyglet.shapes.BorderedRectangle(
-            *args, 3, block_part.color, div_vec(block_part.color, 2)).draw()
-
+            *args, 4, block_part.color, div_vec(block_part.color, 2)).draw()
 
 def draw_ghost_block():
     block_parts: list[tuple[int, int, BlockPart]] = []
@@ -68,7 +58,7 @@ def draw_ghost_block():
     for x, y, block_part in block_parts:
         args = *ltg(x, y), block_size, block_size
         pyglet.shapes.BorderedRectangle(
-            *args, 3, (5, 5, 5), div_vec(block_part.color, 3)).draw()
+            *args, 3, div_vec(block_part.color, 8), div_vec(block_part.color, 3)).draw()
 
 @window.event
 def on_key_press(symbol, modifiers):
