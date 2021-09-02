@@ -1,15 +1,13 @@
-from typing import Any, Callable, Generator, Iterable, TypeVar, Union
+from typing import Generator, Iterable, TypeVar, Union
 import pyglet
 import pyglet.window.key as key
 from . import BlockPart, State, div_vec
-from itertools import chain
 
 state = State()
 
 block_size = 33
 grid_color = 33, 33, 33
 width, height = state.board.width, state.board.height
-
 playfield_offset_x, playfield_offset_y = 200, 0
 
 window = pyglet.window.Window(
