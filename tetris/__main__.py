@@ -49,16 +49,19 @@ def draw_blocks():
         pyglet.shapes.BorderedRectangle(
             *args, 4, block_part.color, div_vec(block_part.color, 2)).draw()
 
+
 def draw_ghost_block():
     block_parts: list[tuple[int, int, BlockPart]] = []
     for y, row in enumerate(state.current.matrix):
         for x, block_part in enumerate(row):
             if block_part:
-                block_parts.append((x + state.x, y + state.bottom_fitting_y, block_part))
+                block_parts.append(
+                    (x + state.x, y + state.bottom_fitting_y, block_part))
     for x, y, block_part in block_parts:
         args = *ltg(x, y), block_size, block_size
         pyglet.shapes.BorderedRectangle(
             *args, 3, div_vec(block_part.color, 8), div_vec(block_part.color, 3)).draw()
+
 
 @window.event
 def on_key_press(symbol, modifiers):
