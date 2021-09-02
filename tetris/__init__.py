@@ -158,6 +158,7 @@ class State:
         cleared_lines = self.board.clear_lines()
         assert cleared_lines <= 4
         self.score += scores_for_lines[cleared_lines] * (self.level + 1)
+        self.soft_drop()
 
     def move(self, dx: int, dy: int):
         self.x += dx
