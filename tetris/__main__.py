@@ -1,7 +1,7 @@
 from typing import Type
 import pyglet
 import pyglet.window.key as key
-from . import Block, BlockPart, State
+from . import BlockPart, State, div_vec
 
 
 state = State()
@@ -11,15 +11,11 @@ grid_color = 33, 33, 33
 width, height = state.board.width, state.board.height
 
 window = pyglet.window.Window(
-    width=(width + 1)*block_size, height=(height + 1)*block_size)
+    width=(width)*block_size, height=(height)*block_size)
 
 
 def ltg(x: int, y: int):
     return x * block_size, (height - y) * block_size
-
-
-def div_vec(vec: tuple[int, ...], scalar: int):
-    return *map(lambda x: x // scalar, vec),
 
 
 @window.event
@@ -27,6 +23,7 @@ def on_draw():
     window.clear()
     draw_grid()
     draw_static_blocks()
+    draw_ghost_block()
     draw_current_block()
 
 
@@ -40,7 +37,7 @@ def draw_grid():
 
 
 def draw_static_blocks():
-    blocks: list[tuple[int, int, Block]] = []
+    blocks: list[tuple[int, int, BlockPart]] = []
     for y, row in enumerate(state.board.board):
         for x, block in enumerate(row):
             if block:
@@ -57,7 +54,7 @@ def draw_current_block():
     block_parts: list[tuple[int, int, BlockPart]] = []
     for y, row in enumerate(state.current.matrix):
         for x, block_part in enumerate(row):
-            if block_part.active:
+            if block_part:
                 block_parts.append((x + state.x, y + state.y, block_part))
     for x, y, block_part in block_parts:
         args = *ltg(x, y), block_size, block_size
@@ -66,6 +63,18 @@ def draw_current_block():
         pyglet.shapes.BorderedRectangle(
             *args, 3, block_part.color, div_vec(block_part.color, 2)).draw()
 
+
+def draw_ghost_block():
+    block_parts: list[tuple[int, int, BlockPart]] = []
+    for y, row in enumerate(state.current.matrix):
+        for x, block_part in enumerate(row):
+            if block_part:
+                block_parts.append((x + state.x, y + state.bottom_fitting_y + state.current.height, block_part))
+    for x, y, block_part in block_parts:
+        args = *ltg(x, y), block_size, block_size
+        # print(args)
+        pyglet.shapes.BorderedRectangle(
+            *args, 3, (5, 5, 5), div_vec(block_part.color, 3)).draw()
 
 @window.event
 def on_key_press(symbol, modifiers):
@@ -87,6 +96,6 @@ def update(dt):
     state.tick()
 
 
-pyglet.clock.schedule_interval(update, 1)
+pyglet.clock.schedule_interval(update, 1.5)
 
 pyglet.app.run()
