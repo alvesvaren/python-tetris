@@ -50,7 +50,7 @@ class Block:
     def rotate(self, offset: int = 1):
         self.rotation += offset
         return self
-    
+
     def copy(self):
         return Block(self.name, self._raw_shape, self.color)
 
@@ -60,7 +60,7 @@ class Block:
     @property
     def matrix(self):
         return rotate(self.shape, self.rotation)
-    
+
     @property
     def slim_shape(self):
         # new_shape = []
@@ -192,7 +192,7 @@ class State:
         if self.y > (self.bottom_fitting_y):
             self.finish_drop()
 
-        return 1/40 if fast else self.gravity 
+        return 1/40 if fast else self.gravity
 
     def move(self, dx: int, dy: int):
         self.x += dx
@@ -272,5 +272,6 @@ class State:
         self.x, self.y = self.default_x, 0
         self.did_stash = False
 
-        cleared_lines = self.board.clear_lines()
-        self.score += scores_for_lines[cleared_lines] * (self.level + 1)
+        clear_count = self.board.clear_lines()
+        self.cleared_lines += clear_count
+        self.score += scores_for_lines[clear_count] * (self.level + 1)
