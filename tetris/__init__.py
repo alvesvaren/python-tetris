@@ -7,7 +7,7 @@ names = ("I", "J", "L", "O", "S", "T", "Z")
 shapes = (
     ("....", "XXXX", "....", "...."),
     ("X..", "XXX", "...",),
-    ("..X", "XXX", "..."), ("XX", "XX"),
+    ("..X", "XXX", "..."), ("....", ".XX.", ".XX.", "...."),
     (".XX", "XX.", "..."), (".X.", "XXX", "..."),
     ("XX.", ".XX", "..."))
 colors = (
@@ -180,7 +180,7 @@ class State:
     def __init__(self):
         self.blocks = generate_blocks()
         self.board = GameBoard()
-        self.default_x = self.board.width//2 - 1
+        self.default_x = self.board.width//2 - 2
         self.x, self.y = self.default_x, 0
         self.current, self.next = next(self.blocks), next(self.blocks)
         self.hold = None
