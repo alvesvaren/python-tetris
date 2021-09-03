@@ -190,10 +190,10 @@ class State:
 
     def tick(self, fast: bool):
         self.down()
-        if self.y > (self.bottom_fitting_y):
+        if self.y > self.bottom_fitting_y:
             self.finish_drop()
 
-        return 1/40 if fast else self.gravity
+        return 1/20 if fast else self.gravity
 
     def move(self, dx: int, dy: int):
         self.x += dx

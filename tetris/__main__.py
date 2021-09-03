@@ -1,4 +1,4 @@
-from typing import Generator, Iterable, TypeVar, Union
+from typing import Callable, Generator, Iterable, TypeVar, Union
 import pyglet
 import pyglet.window.key as key
 from . import BlockPart, State, div_vec, Block
@@ -76,12 +76,15 @@ def draw_blocks():
 
 
 def draw_ui():
-    draw_block_container(block_size, block_size * (height - 4), state.hold, "HOLD")
+    draw_block_container(block_size, block_size *
+                         (height - 4), state.hold, "HOLD")
     draw_block_container(block_size * (width + 1) +
                          playfield_offset_x, block_size * (height - 4), state.next, "NEXT")
-    
-    pyglet.text.Label(f"Level: {state.level}", font, 20, True, x=block_size, y=block_size).draw()
-    pyglet.text.Label(f"Score: {state.score}", font, 20, True, x=block_size, y=block_size * 2).draw()
+
+    pyglet.text.Label(f"Level: {state.level}", font,
+                      20, True, x=block_size, y=block_size).draw()
+    pyglet.text.Label(f"Score: {state.score}", font,
+                      20, True, x=block_size, y=block_size * 2).draw()
 
 
 def draw_block_container(dx: int, dy: int, block: Union[Block, None], text: str):
@@ -100,14 +103,27 @@ def draw_block_container(dx: int, dy: int, block: Union[Block, None], text: str)
                     local_x, local_y, small_block_size, small_block_size, 2, block_part.color, div_vec(block_part.color, 2)).draw()
 
 
+def intermediate_left(dt):
+    if keys[key.A] or keys[key.LEFT]:
+        pyglet.clock.schedule_interval(repeat_left, 1/20)
+
+
+def intermediate_right(dt):
+    if keys[key.D] or keys[key.RIGHT]:
+        pyglet.clock.schedule_interval(repeat_right, 1/20)
+
+
 @window.event
 def on_key_press(symbol, modifiers):
     if symbol in [key.A, key.LEFT]:
         state.left()
+        pyglet.clock.schedule_once(intermediate_left, 1/3)
     elif symbol in [key.D, key.RIGHT]:
         state.right()
-    # elif symbol in [key.S, key.DOWN]:
-    #     update(None, should_schedule=False)
+        pyglet.clock.schedule_once(intermediate_right, 1/3)
+    elif symbol in [key.S, key.DOWN]:
+        pyglet.clock.unschedule(update)
+        update(None)
     elif symbol in [key.W, key.UP]:
         state.rotate()
     elif symbol == key.SPACE:
@@ -116,8 +132,34 @@ def on_key_press(symbol, modifiers):
         state.stash()
 
 
+@window.event
+def on_key_release(symbol, modifiers):
+    if symbol in [key.A, key.LEFT]:
+        pyglet.clock.unschedule(repeat_left)
+        pyglet.clock.unschedule(intermediate_left)
+    elif symbol in [key.D, key.RIGHT]:
+        pyglet.clock.unschedule(repeat_right)
+        pyglet.clock.unschedule(intermediate_right)
+
+
 keys = key.KeyStateHandler()
 window.push_handlers(keys)
+
+
+def schedule_func(func: Callable):
+
+    pyglet.clock.schedule_once(lambda _: pyglet.clock.schedule_interval(
+        func, 1/20) if keys[key.A] or keys[key.LEFT] else None, 1/2)
+
+
+def repeat_left(dt):
+    if keys[key.A] or keys[key.LEFT]:
+        state.left()
+
+
+def repeat_right(dt):
+    if keys[key.D] or keys[key.RIGHT]:
+        state.right()
 
 
 def update(dt: Union[float, None]):
