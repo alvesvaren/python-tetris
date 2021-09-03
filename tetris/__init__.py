@@ -144,9 +144,10 @@ class BaseBoard:
                 if not part:
                     continue
                 try:
+                    assert y + dy >= 0 and x + dx >= 0
                     if self.board[y + dy][x + dx]:
                         return False
-                except IndexError:
+                except (IndexError, AssertionError):
                     return False
         return True
 
@@ -236,7 +237,6 @@ class State:
 
     def rotate(self, offset: int = 1):
         self.current.rotate(offset)
-        self.constrain()
         if not self.fits:
             self.x += 1
             if not self.fits:
@@ -244,6 +244,7 @@ class State:
                 if not self.fits:
                     self.x += 1
                     self.current.rotate(-offset)
+        self.constrain()
 
     def constrain(self):
         while self.x + self.current.max_x > self.board.width:

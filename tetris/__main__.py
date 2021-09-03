@@ -13,7 +13,7 @@ playfield_offset_x, playfield_offset_y = 200, 0
 font = "Open Sans"
 
 window = pyglet.window.Window(
-    width=width*block_size + 400, height=height*block_size)
+    width=width*block_size + 400, height=height*block_size, caption="Tetris")
 
 T = TypeVar("T")
 
