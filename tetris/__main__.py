@@ -10,6 +10,7 @@ small_block_size = block_size // 2
 grid_color = 33, 33, 33
 width, height = state.board.width, state.board.height
 playfield_offset_x, playfield_offset_y = 200, 0
+font = "Open Sans"
 
 window = pyglet.window.Window(
     width=width*block_size + 400, height=height*block_size)
@@ -78,6 +79,9 @@ def draw_ui():
     draw_block_container(block_size, block_size * (height - 4), state.hold, "HOLD")
     draw_block_container(block_size * (width + 1) +
                          playfield_offset_x, block_size * (height - 4), state.next, "NEXT")
+    
+    pyglet.text.Label(f"Level: {state.level}", font, 20, True, x=block_size, y=block_size).draw()
+    pyglet.text.Label(f"Score: {state.score}", font, 20, True, x=block_size, y=block_size * 2).draw()
 
 
 def draw_block_container(dx: int, dy: int, block: Union[Block, None], text: str):
@@ -85,7 +89,7 @@ def draw_block_container(dx: int, dy: int, block: Union[Block, None], text: str)
     pyglet.shapes.BorderedRectangle(
         dx, dy,
         container_width, small_block_size * 4, 16, (50, 50, 50), (33, 33, 33)).draw()
-    pyglet.text.Label(text, "Open Sans", 20, True, color=(
+    pyglet.text.Label(text, font, 20, True, color=(
         255, 255, 255, 255), x=dx + container_width // 2, y=dy + small_block_size * 5, anchor_x='center').draw()
     if block:
         for x, y, block_part in generate_matrix(block.slim_shape[::-1]):
