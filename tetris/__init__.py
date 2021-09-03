@@ -41,6 +41,7 @@ class BlockPart:
 class Block:
     def __init__(self, name: str, raw_shape: tuple[str, ...], color: tuple[int, int, int]):
         self.name = name
+        self._raw_shape = raw_shape
         self.shape: Shape = [tuple(BlockPart(
             color) if char == "X" else None for char in row) for row in raw_shape]
         self.rotation = 0
@@ -49,6 +50,9 @@ class Block:
     def rotate(self, offset: int = 1):
         self.rotation += offset
         return self
+    
+    def copy(self):
+        return Block(self.name, self._raw_shape, self.color)
 
     def __repr__(self):
         return f"Block({self.name}, rot={self.rotation})"
@@ -120,19 +124,13 @@ class BaseBoard:
         self.board = [
             self.empty_row.copy() for _ in range(self.height)]
 
-    def __getitem__(self, *args, **kwargs):
-        return self.board.__getitem__(*args, **kwargs)
-
-    def intersect(self, other: 'BaseBoard'):
-        return [[self[y][x] or other[y][x] for x in range(self.width)] for y in range(self.height)]
-
     def fits_block(self, block: Block, dx: int, dy: int):
         for y, row in enumerate(block.matrix):
             for x, part in enumerate(row):
                 if not part:
                     continue
                 try:
-                    if self[y + dy][x + dx]:
+                    if self.board[y + dy][x + dx]:
                         return False
                 except IndexError:
                     return False
@@ -175,12 +173,12 @@ class State:
         self.score = 0
         self.did_stash = False
 
-    def tick(self):
-        self.soft_drop()
+    def tick(self, fast: bool):
+        self.down()
         if self.y >= (self.bottom_fitting_y):
             self.finish_drop()
 
-        return self.gravity
+        return 1/40 if fast else self.gravity 
 
     def move(self, dx: int, dy: int):
         self.x += dx
@@ -207,7 +205,7 @@ class State:
     def fits(self):
         return self.board.fits_block(self.current, self.x, self.y)
 
-    def soft_drop(self):
+    def down(self):
         self.y += 1
 
     def left(self):

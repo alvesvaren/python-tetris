@@ -100,8 +100,8 @@ def on_key_press(symbol, modifiers):
         state.left()
     elif symbol in [key.D, key.RIGHT]:
         state.right()
-    elif symbol in [key.S, key.DOWN]:
-        state.soft_drop()
+    # elif symbol in [key.S, key.DOWN]:
+    #     update(None, should_schedule=False)
     elif symbol in [key.W, key.UP]:
         state.rotate()
     elif symbol == key.SPACE:
@@ -110,10 +110,14 @@ def on_key_press(symbol, modifiers):
         state.stash()
 
 
-def update(dt):
-    print(state.tick())
+keys = key.KeyStateHandler()
+window.push_handlers(keys)
+
+def update(dt: Union[float, None]):
+    next_tick = state.tick(keys[key.S] or keys[key.DOWN])
+    pyglet.clock.schedule_once(update, next_tick)
 
 
-pyglet.clock.schedule_interval(update, 1.5)
+update(None)
 
 pyglet.app.run()
