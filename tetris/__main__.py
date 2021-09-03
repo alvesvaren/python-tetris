@@ -1,7 +1,7 @@
 from typing import Generator, Iterable, TypeVar, Union
 import pyglet
 import pyglet.window.key as key
-from . import BlockPart, State, div_vec
+from . import BlockPart, State, div_vec, Block
 
 state = State()
 
@@ -75,21 +75,23 @@ def draw_blocks():
 
 
 def draw_ui():
-    pyglet.text.Label("HOLD", "Open Sans", 24, True, color=(
-        255, 255, 255, 255), x=block_size + (small_block_size * 8) // 2, y=block_size * (height - 1.2), anchor_x='center').draw()
+    draw_block_container(block_size, block_size * (height - 4), state.hold, "HOLD")
+    draw_block_container(block_size * (width + 1) +
+                         playfield_offset_x, block_size * (height - 4), state.next, "NEXT")
+
+
+def draw_block_container(dx: int, dy: int, block: Union[Block, None], text: str):
+    container_width = small_block_size * 6
     pyglet.shapes.BorderedRectangle(
-        block_size, block_size * (height - 4),
-        small_block_size * 8, small_block_size * 5, 16, (50, 50, 50), (33, 33, 33)).draw()
-    draw_hold_block()
-
-
-def draw_hold_block():
-    if state.hold:
-        for x, y, block_part in generate_matrix(state.hold.shape[::-1]):
+        dx, dy,
+        container_width, small_block_size * 4, 16, (50, 50, 50), (33, 33, 33)).draw()
+    pyglet.text.Label(text, "Open Sans", 20, True, color=(
+        255, 255, 255, 255), x=dx + container_width // 2, y=dy + small_block_size * 5, anchor_x='center').draw()
+    if block:
+        for x, y, block_part in generate_matrix(block.slim_shape[::-1]):
             if block_part:
-                local_x, local_y = x * small_block_size + block_size + \
-                    small_block_size * 2, y * small_block_size + \
-                    block_size * (height - 4)
+                local_x, local_y = (x - 1) * small_block_size + dx + \
+                    small_block_size * 2, y * small_block_size + dy + small_block_size
                 pyglet.shapes.BorderedRectangle(
                     local_x, local_y, small_block_size, small_block_size, 2, block_part.color, div_vec(block_part.color, 2)).draw()
 
@@ -112,6 +114,7 @@ def on_key_press(symbol, modifiers):
 
 keys = key.KeyStateHandler()
 window.push_handlers(keys)
+
 
 def update(dt: Union[float, None]):
     next_tick = state.tick(keys[key.S] or keys[key.DOWN])
