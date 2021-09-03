@@ -85,7 +85,7 @@ def draw_ui():
 
 def draw_hold_block():
     if state.hold:
-        for x, y, block_part in generate_matrix(state.hold.matrix):
+        for x, y, block_part in generate_matrix(state.hold.shape[::-1]):
             if block_part:
                 local_x, local_y = x * small_block_size + block_size + \
                     small_block_size * 2, y * small_block_size + \
