@@ -121,7 +121,7 @@ def _generate_bag():
     shuffle(bag)
 
     while bag:
-        yield bag[0]
+        yield bag[0].copy()
         bag.pop(0)
 
 
