@@ -114,7 +114,7 @@ def intermediate_right(dt):
 
 
 @window.event
-def on_key_press(symbol, modifiers):
+def on_key_press(symbol: int, modifiers: int):
     if symbol in [key.A, key.LEFT]:
         state.left()
         pyglet.clock.schedule_once(intermediate_left, 1/3)
@@ -125,7 +125,8 @@ def on_key_press(symbol, modifiers):
         pyglet.clock.unschedule(update)
         update(None)
     elif symbol in [key.W, key.UP]:
-        state.rotate()
+        holding_shift = bool(modifiers & key.MOD_SHIFT)
+        state.rotate(-1 if holding_shift else 1)
     elif symbol == key.SPACE:
         state.finish_drop()
     elif symbol == key.C:
@@ -140,6 +141,8 @@ def on_key_release(symbol, modifiers):
     elif symbol in [key.D, key.RIGHT]:
         pyglet.clock.unschedule(repeat_right)
         pyglet.clock.unschedule(intermediate_right)
+    elif symbol in [key.S, key.DOWN]:
+        pyglet.clock.unschedule(update)
 
 
 keys = key.KeyStateHandler()
