@@ -63,16 +63,6 @@ class Block:
 
     @property
     def slim_shape(self):
-        # new_shape = []
-        # empty_rows = 0
-        # for y, row in enumerate(self.shape):
-        #     y -= empty_rows
-        #     if any(row):
-        #         new_shape.append([])
-        #     else:
-        #         empty_rows += 1
-        #         continue
-        #     for x, block_part in enumerate(row):
         return list(filter(lambda row: any(row), self.shape))
 
     @property

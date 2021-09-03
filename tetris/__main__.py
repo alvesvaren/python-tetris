@@ -149,12 +149,6 @@ keys = key.KeyStateHandler()
 window.push_handlers(keys)
 
 
-def schedule_func(func: Callable):
-
-    pyglet.clock.schedule_once(lambda _: pyglet.clock.schedule_interval(
-        func, 1/20) if keys[key.A] or keys[key.LEFT] else None, 1/2)
-
-
 def repeat_left(dt):
     if keys[key.A] or keys[key.LEFT]:
         state.left()
