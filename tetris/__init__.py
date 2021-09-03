@@ -230,6 +230,7 @@ class State:
             if not self.fits:
                 self.x -= 2
                 if not self.fits:
+                    self.x += 1
                     self.current.rotate(-offset)
 
     def constrain(self):
