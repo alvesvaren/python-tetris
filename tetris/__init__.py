@@ -240,16 +240,17 @@ class State:
             self.x += 1
 
     def stash(self):
-        had_stashed = self.hold
-        self.hold = self.current
-        if had_stashed:
-            self.current = had_stashed
-        else:
-            self.current = self.next
-            self.next = next(self.blocks)
+        if not self.did_stash:
+            had_stashed = self.hold
+            self.hold = self.current
+            if had_stashed:
+                self.current = had_stashed
+            else:
+                self.current = self.next
+                self.next = next(self.blocks)
 
-        self.x, self.y = self.default_x, 0
-        self.did_stash = True
+            self.x, self.y = self.default_x, 0
+            self.did_stash = True
 
     def finish_drop(self):
         self.board.place_block(self.current, self.x, self.bottom_fitting_y)
